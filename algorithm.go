@@ -21,6 +21,7 @@ type User struct {
 const (
 	movieCategoriesNumber = 30
 	usersNumber           = 10000
+	maxPredictCategories  = 10
 )
 
 func main() {
@@ -34,9 +35,34 @@ func main() {
 
 	nearestNeighbors := FindNearestNeighborsForUser(needyUser.id, users, movieCategories)
 	similarUsersPrint(nearestNeighbors)
+	predictedPreferredCategories := PredictPreferredCategories(needyUser, nearestNeighbors, movieCategories)
+	predictedPreferredCategoriesPrint(predictedPreferredCategories)
 
 	benchmarkStop := time.Since(benchmarkStart)
 	fmt.Printf("Benchmark time: %s", benchmarkStop)
+}
+
+func PredictPreferredCategories(needyUser User, nearestNeighbors map[float64]User, movieCategories []MovieCategory) []MovieCategory {
+	predictedCategoriesRating := make(map[int]int)
+	var predictedCategories []MovieCategory
+	for _, v := range nearestNeighbors {
+		userWatchedMovies := v.watchedMovies
+		for k, v := range userWatchedMovies {
+			predictedCategoriesRating[k] += v
+		}
+	}
+	predictedCategoriesRating = filteredVal(predictedCategoriesRating)
+
+	for k, _ := range predictedCategoriesRating {
+		predictedCategories = append(predictedCategories, movieCategories[k-1])
+	}
+	return predictedCategories
+}
+
+func predictedPreferredCategoriesPrint(movieCategories []MovieCategory) {
+	for _, category := range movieCategories {
+		fmt.Printf("Predicted category: %v\n", category.name)
+	}
 }
 
 func similarUsersPrint(neighbors map[float64]User) {
@@ -87,7 +113,7 @@ func countPathLength(needyUser User, comparedUser User) float64 {
 
 func addMovieCategories(movieCategories *[]MovieCategory) {
 	for i := 1; i <= movieCategoriesNumber; i++ {
-		movieCategory := MovieCategory{i, fmt.Sprintf("Movie category %s", i)}
+		movieCategory := MovieCategory{i, fmt.Sprintf("Movie category %d", i)}
 		*movieCategories = append(*movieCategories, movieCategory)
 	}
 }
@@ -112,4 +138,33 @@ func generateWatchedMoviesForUser() map[int]int {
 func randomInt(min, max int) int {
 	rand.Seed(time.Now().UnixNano())
 	return rand.Intn(max-min) + min
+}
+
+func filteredVal(data map[int]int) map[int]int {
+	filteredVal := make(map[int]int)
+	for k, v := range data {
+		lowestKey, lowestValue := lowestMapValue(filteredVal)
+		if len(filteredVal) == maxPredictCategories && lowestValue < v {
+			delete(filteredVal, lowestKey)
+			filteredVal[k] = v
+		} else if len(filteredVal) < maxPredictCategories {
+			filteredVal[k] = v
+		}
+	}
+	return filteredVal
+}
+
+func lowestMapValue(data map[int]int) (int, int) {
+	minVal := int(^uint(0) >> 1)
+	var key int
+	var value int
+
+	for k, v := range data {
+		if v < minVal {
+			minVal = v
+			key = k
+			value = v
+		}
+	}
+	return key, value
 }
