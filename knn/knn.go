@@ -35,10 +35,9 @@ func SimilarUsersPrint(neighbors map[float64]lib.User) {
 	}
 }
 
-func FindNearestNeighborsForUser(needy_id int, users []lib.User, movieCategories []lib.MovieCategory) map[float64]lib.User {
+func FindNearestNeighborsForUser(needyUser lib.User, users []lib.User, movieCategories []lib.MovieCategory) map[float64]lib.User {
 	neighborsMaxQuantity := int(math.Sqrt(lib.UsersNumber))
-	index := needy_id - 2
-	needyUser := users[index]
+	index := indexOfUser(needyUser, users)
 	users = append(users[:index], users[index+1:]...)
 	similarObjects := make(map[float64]lib.User)
 
@@ -102,4 +101,25 @@ func lowestMapValue(data map[int]int) (int, int) {
 		}
 	}
 	return key, value
+}
+
+func indexOfUser(user lib.User, collection []lib.User) int {
+	var mid int
+	var low int
+	high := len(collection)
+	for low <= high {
+		mid := (low + high) / 2
+		guess := collection[mid]
+		if user.Id == guess.Id {
+			return mid
+		} else if guess.Id > user.Id {
+			fmt.Println(guess.Id)
+			high = mid - 1
+		} else if guess.Id < user.Id {
+			low = mid + 1
+		} else {
+			return -1
+		}
+	}
+	return mid
 }

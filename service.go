@@ -17,7 +17,7 @@ func main() {
 
 	benchmarkStart := time.Now()
 
-	nearestNeighbors := knn.FindNearestNeighborsForUser(needyUser.Id, users, movieCategories)
+	nearestNeighbors := knn.FindNearestNeighborsForUser(needyUser, users, movieCategories)
 	knn.SimilarUsersPrint(nearestNeighbors)
 	predictedPreferredCategories := knn.PredictPreferredCategories(needyUser, nearestNeighbors, movieCategories)
 	knn.PredictedPreferredCategoriesPrint(predictedPreferredCategories)
