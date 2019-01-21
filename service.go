@@ -19,9 +19,12 @@ func main() {
 
 	nearestNeighbors := knn.FindNearestNeighborsForUser(needyUser, users, movieCategories)
 	knn.SimilarUsersPrint(nearestNeighbors)
+
 	predictedPreferredCategories := knn.PredictPreferredCategories(needyUser, nearestNeighbors, movieCategories)
 	knn.PredictedPreferredCategoriesPrint(predictedPreferredCategories)
 
+	mostSimilarUser := knn.FindMostSimilarUser(needyUser, nearestNeighbors)
+	fmt.Printf("Most similar user: %s\n", mostSimilarUser.Name)
 	benchmarkStop := time.Since(benchmarkStart)
 	fmt.Printf("Benchmark time: %s\n", benchmarkStop)
 }

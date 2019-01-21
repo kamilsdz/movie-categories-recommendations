@@ -23,15 +23,27 @@ func PredictPreferredCategories(needyUser lib.User, nearestNeighbors map[float64
 	return predictedCategories
 }
 
+func FindMostSimilarUser(user lib.User, nearestNeighbors map[float64]lib.User) lib.User {
+	lowestValue := math.MaxFloat64
+	var mostSimilarUser lib.User
+	for k, v := range nearestNeighbors {
+		if k < lowestValue {
+			lowestValue = k
+			mostSimilarUser = v
+		}
+	}
+	return mostSimilarUser
+}
+
 func PredictedPreferredCategoriesPrint(movieCategories []lib.MovieCategory) {
 	for _, category := range movieCategories {
-		fmt.Printf("Predicted category: %v\n", category.Name)
+		fmt.Printf("Predicted recommended category for the needyUser: %v\n", category.Name)
 	}
 }
 
 func SimilarUsersPrint(neighbors map[float64]lib.User) {
-	for i, v := range neighbors {
-		fmt.Printf("Rating: %f - Username: %s\n", i, v.Name)
+	for k, v := range neighbors {
+		fmt.Printf("Similar user to needyUser: Name: %s, Rating: %f\n", v.Name, k)
 	}
 }
 
@@ -51,16 +63,6 @@ func FindNearestNeighborsForUser(needyUser lib.User, users []lib.User, movieCate
 		}
 	}
 	return similarObjects
-}
-
-func highestKeyValue(similarObjects map[float64]lib.User) float64 {
-	value := 0.0
-	for k, _ := range similarObjects {
-		if k > value {
-			value = k
-		}
-	}
-	return value
 }
 
 func countPathLength(needyUser lib.User, comparedUser lib.User) float64 {
@@ -88,6 +90,16 @@ func filteredVal(data map[int]int) map[int]int {
 	return filteredVal
 }
 
+func highestKeyValue(similarObjects map[float64]lib.User) float64 {
+	value := 0.0
+	for k, _ := range similarObjects {
+		if k > value {
+			value = k
+		}
+	}
+	return value
+}
+
 func lowestMapValue(data map[int]int) (int, int) {
 	minVal := int(^uint(0) >> 1)
 	var key int
@@ -113,7 +125,6 @@ func indexOfUser(user lib.User, collection []lib.User) int {
 		if user.Id == guess.Id {
 			return mid
 		} else if guess.Id > user.Id {
-			fmt.Println(guess.Id)
 			high = mid - 1
 		} else if guess.Id < user.Id {
 			low = mid + 1
