@@ -54,15 +54,19 @@ func FindNearestNeighborsForUser(needyUser lib.User, users []lib.User, movieCate
 	similarObjects := make(map[float64]lib.User)
 
 	for i := 0; i < lib.UsersNumber-1; i++ {
-		pathLength := countPathLength(needyUser, users[i])
-		if len(similarObjects) <= neighborsMaxQuantity || float64(highestKeyValue(similarObjects)) > pathLength {
-			if len(similarObjects) == neighborsMaxQuantity {
-				delete(similarObjects, highestKeyValue(similarObjects))
-			}
-			similarObjects[pathLength] = users[i]
-		}
+		addNearestNeighbor(i, &similarObjects, needyUser, users, neighborsMaxQuantity)
 	}
 	return similarObjects
+}
+
+func addNearestNeighbor(i int, similarObjects *map[float64]lib.User, needyUser lib.User, users []lib.User, neighborsMaxQuantity int) {
+	pathLength := countPathLength(needyUser, users[i])
+	if len(*similarObjects) <= neighborsMaxQuantity || float64(highestKeyValue(*similarObjects)) > pathLength {
+		if len(*similarObjects) == neighborsMaxQuantity {
+			delete(*similarObjects, highestKeyValue(*similarObjects))
+		}
+		(*similarObjects)[pathLength] = users[i]
+	}
 }
 
 func countPathLength(needyUser lib.User, comparedUser lib.User) float64 {
