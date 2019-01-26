@@ -13,6 +13,7 @@ type User struct {
 
 const (
 	MovieCategoriesNumber = 30
-	UsersNumber           = 10000
+	UsersNumber           = 50000
 	MaxPredictCategories  = 10
+	NearestNeighborsPart  = 1000
 )
