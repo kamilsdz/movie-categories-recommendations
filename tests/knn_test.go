@@ -38,7 +38,7 @@ func buildNearestNeighbors() (lib.User, []lib.User, []lib.MovieCategory, map[flo
 
 func TestNeighborsQuantity(t *testing.T) {
 	_, _, _, nearestNeighbors := buildNearestNeighbors()
-	if len(nearestNeighbors) != 2 {
+	if len(nearestNeighbors) != 1 {
 		t.Errorf("Incorrect nearest neighbors quantity, got: %d, want: %d.", len(nearestNeighbors), 2)
 	}
 }

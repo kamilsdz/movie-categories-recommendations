@@ -43,15 +43,16 @@ func PredictedPreferredCategoriesPrint(movieCategories []lib.MovieCategory) {
 
 func SimilarUsersPrint(neighbors map[float64]lib.User) {
 	for k, v := range neighbors {
-		fmt.Printf("Similar user to needyUser: Name: %s, Rating: %f\n", v.Name, k)
+		fmt.Printf("Similar user to needyUser: Name: %s, Path: %f\n", v.Name, k)
 	}
 }
 
 func OptimizedFindNearestNeighborsForUser(needyUser lib.User, users []lib.User, movieCategories []lib.MovieCategory) map[float64]lib.User {
 	var neighborsMaxQuantity int
-	ch := make(chan map[float64]lib.User)
 	var counter int
+	ch := make(chan map[float64]lib.User)
 	similarObjects := make(map[float64]lib.User)
+	nearestObjects := make(map[float64]lib.User)
 	needyUserIndex := indexOfUser(needyUser, users)
 	users = append(users[:needyUserIndex], users[needyUserIndex+1:]...)
 	for i := 0; i < len(users); i += lib.NearestNeighborsPart {
@@ -70,25 +71,28 @@ func OptimizedFindNearestNeighborsForUser(needyUser lib.User, users []lib.User, 
 			similarObjects[k] = v
 		}
 	}
-	return similarObjects
+	maxQuantity := int(math.Sqrt(float64(len(similarObjects))))
+	buildNearestNeighbors(&nearestObjects, &similarObjects, needyUser, maxQuantity)
+	return nearestObjects
 }
 
 func FindNearestNeighborsForUser(needyUser lib.User, users []lib.User, movieCategories []lib.MovieCategory, ch chan<- map[float64]lib.User) {
-	neighborsMaxQuantity := int(math.Sqrt(float64(len(users))))
 	similarObjects := make(map[float64]lib.User)
 
 	for i := range users {
-		addNearestNeighbor(i, &similarObjects, needyUser, users, neighborsMaxQuantity)
+		pathLength := countPathLength(needyUser, users[i])
+		similarObjects[pathLength] = users[i]
 	}
 	ch <- similarObjects
 }
 
-func addNearestNeighbor(i int, similarObjects *map[float64]lib.User, needyUser lib.User, users []lib.User, neighborsMaxQuantity int) {
-	pathLength := countPathLength(needyUser, users[i])
-	if len(*similarObjects) <= neighborsMaxQuantity || float64(highestKeyValue(*similarObjects)) > pathLength {
-		(*similarObjects)[pathLength] = users[i]
-		if len(*similarObjects) > neighborsMaxQuantity {
-			delete(*similarObjects, highestKeyValue(*similarObjects))
+func buildNearestNeighbors(nearestObjects *map[float64]lib.User, similarObjects *map[float64]lib.User, needyUser lib.User, neighborsMaxQuantity int) {
+	for path, neighbor := range *similarObjects {
+		if len(*nearestObjects) <= neighborsMaxQuantity || float64(highestKeyValue(*nearestObjects)) > path {
+			(*nearestObjects)[path] = neighbor
+			if len(*nearestObjects) > neighborsMaxQuantity {
+				delete(*nearestObjects, highestKeyValue(*nearestObjects))
+			}
 		}
 	}
 }
