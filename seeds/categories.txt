@@ -1,0 +1,20 @@
+1,Action
+2,Anime
+3,Adventure
+4,Animation
+5,Comedy
+6,Crime
+7,Drama
+8,Fantasy
+9,Historical
+10,Horror
+11,Musical
+12,Mystery
+13,Political
+14,Reality Show
+15,Romance
+16,Science
+17,Science Fiction
+18,Spy Movie
+19,Thriller
+20,Western

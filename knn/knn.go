@@ -6,12 +6,12 @@ import (
 	"math"
 )
 
-func PredictPreferredCategories(needyUser lib.User, nearestNeighbors map[float64]lib.User, movieCategories []lib.MovieCategory) []lib.MovieCategory {
+func PredictPreferredCategories(currentUser lib.User, nearestNeighbors map[float64]lib.User, movieCategories []lib.MovieCategory) []lib.MovieCategory {
 	predictedCategoriesRating := make(map[int]int)
 	var predictedCategories []lib.MovieCategory
 	for _, v := range nearestNeighbors {
-		userWatchedMovies := v.WatchedMovies
-		for k, v := range userWatchedMovies {
+		userWatchedCategories := v.WatchedCategories
+		for k, v := range userWatchedCategories {
 			predictedCategoriesRating[k] += v
 		}
 	}
@@ -37,33 +37,33 @@ func FindMostSimilarUser(user lib.User, nearestNeighbors map[float64]lib.User) l
 
 func PredictedPreferredCategoriesPrint(movieCategories []lib.MovieCategory) {
 	for _, category := range movieCategories {
-		fmt.Printf("Predicted recommended category for the needyUser: %v\n", category.Name)
+		fmt.Printf("Predicted recommended category for the currentUser: %v\n", category.Name)
 	}
 }
 
 func SimilarUsersPrint(neighbors map[float64]lib.User) {
 	for k, v := range neighbors {
-		fmt.Printf("Similar user to needyUser: Name: %s, Path: %f\n", v.Name, k)
+		fmt.Printf("Similar user to currentUser: Name: %s, Path: %f\n", v.Name, k)
 	}
 }
 
-func OptimizedFindNearestNeighborsForUser(needyUser lib.User, users []lib.User, movieCategories []lib.MovieCategory) map[float64]lib.User {
+func OptimizedFindNearestNeighborsForUser(currentUser lib.User, users []lib.User, movieCategories []lib.MovieCategory) map[float64]lib.User {
 	var neighborsMaxQuantity int
 	var counter int
 	ch := make(chan map[float64]lib.User)
 	similarObjects := make(map[float64]lib.User)
 	nearestObjects := make(map[float64]lib.User)
-	needyUserIndex := indexOfUser(needyUser, users)
-	users = append(users[:needyUserIndex], users[needyUserIndex+1:]...)
-	for i := 0; i < len(users); i += lib.NearestNeighborsPart {
+	currentUserIndex := indexOfUser(currentUser, users)
+	users = append(users[:currentUserIndex], users[currentUserIndex+1:]...)
+	for i := 0; i < len(users); i += lib.NearestNeighborsBatch {
 		counter++
-		if len(users) < i+lib.NearestNeighborsPart {
+		if len(users) < i+lib.NearestNeighborsBatch {
 			neighborsMaxQuantity = len(users) - i
 		} else {
-			neighborsMaxQuantity = lib.NearestNeighborsPart
+			neighborsMaxQuantity = lib.NearestNeighborsBatch
 		}
 		partedUsers := users[i : i+neighborsMaxQuantity]
-		go FindNearestNeighborsForUser(needyUser, partedUsers, movieCategories, ch)
+		go FindNearestNeighborsForUser(currentUser, partedUsers, movieCategories, ch)
 	}
 	for i := 0; i < counter; i++ {
 		results := <-ch
@@ -72,21 +72,21 @@ func OptimizedFindNearestNeighborsForUser(needyUser lib.User, users []lib.User, 
 		}
 	}
 	maxQuantity := int(math.Sqrt(float64(len(similarObjects))))
-	buildNearestNeighbors(&nearestObjects, &similarObjects, needyUser, maxQuantity)
+	buildNearestNeighbors(&nearestObjects, &similarObjects, currentUser, maxQuantity)
 	return nearestObjects
 }
 
-func FindNearestNeighborsForUser(needyUser lib.User, users []lib.User, movieCategories []lib.MovieCategory, ch chan<- map[float64]lib.User) {
+func FindNearestNeighborsForUser(currentUser lib.User, users []lib.User, movieCategories []lib.MovieCategory, ch chan<- map[float64]lib.User) {
 	similarObjects := make(map[float64]lib.User)
 
 	for i := range users {
-		pathLength := countPathLength(needyUser, users[i])
+		pathLength := countPathLength(currentUser, users[i])
 		similarObjects[pathLength] = users[i]
 	}
 	ch <- similarObjects
 }
 
-func buildNearestNeighbors(nearestObjects *map[float64]lib.User, similarObjects *map[float64]lib.User, needyUser lib.User, neighborsMaxQuantity int) {
+func buildNearestNeighbors(nearestObjects *map[float64]lib.User, similarObjects *map[float64]lib.User, currentUser lib.User, neighborsMaxQuantity int) {
 	for path, neighbor := range *similarObjects {
 		if len(*nearestObjects) <= neighborsMaxQuantity || float64(highestKeyValue(*nearestObjects)) > path {
 			(*nearestObjects)[path] = neighbor
@@ -97,12 +97,12 @@ func buildNearestNeighbors(nearestObjects *map[float64]lib.User, similarObjects 
 	}
 }
 
-func countPathLength(needyUser lib.User, comparedUser lib.User) float64 {
+func countPathLength(currentUser lib.User, comparedUser lib.User) float64 {
 	var dimensionResult float64
-	needyWatchedMovies := needyUser.WatchedMovies
-	comparedWatchedMovies := comparedUser.WatchedMovies
-	for k, v := range comparedWatchedMovies {
-		dimensionResult += math.Pow(float64(v-needyWatchedMovies[k]), 2)
+	needyWatchedCategories := currentUser.WatchedCategories
+	comparedWatchedCategories := comparedUser.WatchedCategories
+	for k, v := range comparedWatchedCategories {
+		dimensionResult += math.Pow(float64(v-needyWatchedCategories[k]), 2)
 	}
 	return math.Sqrt(float64(dimensionResult))
 

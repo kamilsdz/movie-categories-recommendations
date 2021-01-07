@@ -5,15 +5,23 @@ type MovieCategory struct {
 	Name string
 }
 
+type Movie struct {
+	Id int
+	Name string
+	CategoryId int
+}
+
 type User struct {
 	Id            int
 	Name          string
-	WatchedMovies map[int]int
+	WatchedCategories map[int]int
 }
 
 const (
-	MovieCategoriesNumber = 30
+	MoviesSeedFile = "seeds/movies.txt"
+	MovieCategoriesSeedFile = "seeds/categories.txt"
 	UsersNumber           = 50000
-	MaxPredictCategories  = 10
-	NearestNeighborsPart  = 1000
+	MaxPredictCategories  = 5
+	MaxNumberOfWatchedCategories = 5
+	NearestNeighborsBatch  = 1000
 )
