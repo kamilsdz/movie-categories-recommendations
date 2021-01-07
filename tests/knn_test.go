@@ -32,7 +32,7 @@ func buildNearestNeighbors() (lib.User, []lib.User, []lib.MovieCategory, map[flo
 	}
 	currentUser := users[3]
 
-	nearestNeighbors := knn.OptimizedFindNearestNeighborsForUser(currentUser, users, movieCategories)
+	nearestNeighbors := knn.NearestObjects(currentUser, users, movieCategories)
 	return currentUser, users, movieCategories, nearestNeighbors
 }
 
@@ -43,7 +43,7 @@ func TestNeighborsQuantity(t *testing.T) {
 	}
 }
 
-func TestNearestNeighbors(t *testing.T) {
+func TestNearestNeighborsModel(t *testing.T) {
 	_, _, _, nearestNeighbors := buildNearestNeighbors()
 	for _, v := range nearestNeighbors {
 		isCorrect := (v.Name == "Lara Croft" || v.Name == "John Wick")
@@ -52,7 +52,7 @@ func TestNearestNeighbors(t *testing.T) {
 		}
 	}
 }
-func TestPredictPreferredCategories(t *testing.T) {
+func TestPredictedPreferredCategories(t *testing.T) {
 	currentUser, _, movieCategories, nearestNeighbors := buildNearestNeighbors()
 	predictedPreferredCategories := knn.PredictPreferredCategories(currentUser, nearestNeighbors, movieCategories)
 	expectedPreferredCategories := []lib.MovieCategory{movieCategories[0], movieCategories[1], movieCategories[2], movieCategories[3], movieCategories[9]}
@@ -61,7 +61,7 @@ func TestPredictPreferredCategories(t *testing.T) {
 	}
 }
 
-func TestFindMostSimilarUser(t *testing.T) {
+func TestMostSimilarUser(t *testing.T) {
 	currentUser, users, _, nearestNeighbors := buildNearestNeighbors()
 	mostSimilarUser := knn.FindMostSimilarUser(currentUser, nearestNeighbors)
 	if mostSimilarUser.Id != users[0].Id {

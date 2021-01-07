@@ -2,44 +2,44 @@ package seeds
 
 import (
 	"../lib"
-	"fmt"
-	"math/rand"
-	"time"
-	"log"
 	"bufio"
+	"fmt"
+	"log"
+	"math/rand"
 	"os"
-	"strings"
 	"strconv"
+	"strings"
+	"time"
 )
 
 var cachedCategories = readCategories()
 
 func Movies() []lib.Movie {
 	var movies []lib.Movie
-    file, err := os.Open(lib.MoviesSeedFile)
+	file, err := os.Open(lib.MoviesSeedFile)
 
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
 
-    scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(file)
 
-    for scanner.Scan() {
-	 rawMovieData := strings.Split(scanner.Text(), ",")
-	 id, _ := strconv.Atoi(rawMovieData[0])
-	 title := rawMovieData[1]
-	 categoryId, _ := strconv.Atoi(rawMovieData[2])
-	 movie := lib.Movie{id, title, categoryId}
+	for scanner.Scan() {
+		rawMovieData := strings.Split(scanner.Text(), ",")
+		id, _ := strconv.Atoi(rawMovieData[0])
+		title := rawMovieData[1]
+		categoryId, _ := strconv.Atoi(rawMovieData[2])
+		movie := lib.Movie{id, title, categoryId}
 
-        movies = append(movies, movie)
-    }
+		movies = append(movies, movie)
+	}
 
-    if err := scanner.Err(); err != nil {
-        log.Fatal(err)
-    }
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
 
-    return movies
+	return movies
 }
 
 func AddMovieCategories(movieCategories *[]lib.MovieCategory) {
@@ -71,29 +71,29 @@ func randomInt(min, max int) int {
 
 func readCategories() []lib.MovieCategory {
 	var categories []lib.MovieCategory
-    file, err := os.Open(lib.MovieCategoriesSeedFile)
+	file, err := os.Open(lib.MovieCategoriesSeedFile)
 
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
 
-    scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(file)
 
-    for scanner.Scan() {
-	 rawCategoryData := strings.Split(scanner.Text(), ",")
-	 id, _ := strconv.Atoi(rawCategoryData[0])
-	 name := rawCategoryData[1]
-	 category := lib.MovieCategory{id, name}
+	for scanner.Scan() {
+		rawCategoryData := strings.Split(scanner.Text(), ",")
+		id, _ := strconv.Atoi(rawCategoryData[0])
+		name := rawCategoryData[1]
+		category := lib.MovieCategory{id, name}
 
-        categories = append(categories, category)
-    }
+		categories = append(categories, category)
+	}
 
-    if err := scanner.Err(); err != nil {
-        log.Fatal(err)
-    }
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
 
-    return categories
+	return categories
 }
 
 func categoriesSize() int {
